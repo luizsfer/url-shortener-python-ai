@@ -50,7 +50,11 @@ cp .env.example .env
 
 5. Inicie a aplicação:
 ```bash
+# Para desenvolvimento local
 uvicorn app.main:app --reload
+
+# Para produção
+uvicorn app.main:app --host 0.0.0.0 --port $PORT
 ```
 
 ## Uso
@@ -79,6 +83,17 @@ curl -X POST "http://localhost:8000/api/v1/shorten" -H "Content-Type: applicatio
 http://localhost:8000/abc123
 ```
 
+## Persistência de Dados
+
+As URLs encurtadas e suas estatísticas são armazenadas em um arquivo JSON no diretório `data/`. Isso garante que os dados não sejam perdidos quando a aplicação for reiniciada.
+
+## Configuração do Servidor
+
+A aplicação pode ser configurada através das seguintes variáveis de ambiente:
+
+- `PORT`: Porta em que a aplicação irá escutar (padrão: 8000)
+- `HOST`: Host em que a aplicação irá escutar (padrão: 0.0.0.0)
+
 ## Segurança
 
 - Rate limiting por IP
@@ -93,10 +108,6 @@ Os logs são armazenados no diretório `logs/` com rotação automática:
 - `api.log` - Logs gerais da API
 - `security.log` - Logs de segurança
 - `memory.log` - Logs do repositório em memória
-
-## Persistência de Dados
-
-As URLs encurtadas e suas estatísticas são armazenadas em um arquivo JSON no diretório `data/`. Isso garante que os dados não sejam perdidos quando a aplicação for reiniciada.
 
 ## Contribuição
 

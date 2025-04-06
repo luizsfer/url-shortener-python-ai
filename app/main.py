@@ -5,6 +5,7 @@ from app.api.redirect_routes import router as redirect_router
 from app.core.config import get_settings
 from app.security.middleware import SecurityMiddleware
 from app.core.logging import api_logger
+import os
 
 settings = get_settings()
 
@@ -33,6 +34,8 @@ app.include_router(url_router, prefix="/api/v1", tags=["urls"])
 @app.on_event("startup")
 async def startup_event():
     api_logger.info("API iniciada com sucesso")
+    api_logger.info(f"Host: 0.0.0.0")
+    api_logger.info(f"Port: {os.getenv('PORT', '8000')}")
 
 @app.on_event("shutdown")
 async def shutdown_event():
