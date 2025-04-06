@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: url-shortener
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: APP_TITLE
+        value: URL Shortener API
+      - key: APP_DESCRIPTION
+        value: API para encurtamento de URLs com cache em memória
+      - key: APP_VERSION
+        value: 1.0.0
+      - key: SECURITY_RATE_LIMIT_REQUESTS
+        value: 100
+      - key: SECURITY_RATE_LIMIT_PERIOD
+        value: 3600
+      - key: SECURITY_MAX_URL_LENGTH
+        value: 2048
+      - key: SECURITY_MAX_REQUEST_SIZE
+        value: 1048576
+      - key: SECURITY_IP_BLOCK_DURATION
+        value: 3600
+      - key: SECURITY_MAX_FAILED_REQUESTS
+        value: 100
+
+  - type: redis
+    name: url-shortener-redis
+    ipAllowList: []
+    plan: free 
