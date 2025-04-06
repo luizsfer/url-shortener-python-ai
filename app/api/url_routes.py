@@ -9,6 +9,29 @@ router = APIRouter()
 url_service = URLService()
 security = MemorySecurity()
 
+@router.get("/health")
+async def health_check(request: Request):
+    """
+    Verifica a saúde da API.
+    """
+    try:
+        api_logger.info("Recebida requisição para verificar saúde da API")
+        
+        # Verifica a saúde do repositório
+        is_healthy = url_service.health_check()
+        
+        if not is_healthy:
+            api_logger.error("Falha ao verificar saúde da API")
+            raise HTTPException(status_code=503, detail="Serviço indisponível")
+        
+        api_logger.info("Verificação de saúde da API concluída com sucesso")
+        return {"status": "healthy"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        api_logger.error(f"Erro ao verificar saúde da API: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("/shorten", response_model=URLResponse)
 async def shorten_url(request: Request, url_input: URLInput):
     """
@@ -35,27 +58,26 @@ async def shorten_url(request: Request, url_input: URLInput):
         api_logger.error(f"Erro ao encurtar URL: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/{short_code}", response_model=URLResponse)
-async def get_url(request: Request, short_code: str):
+@router.get("/urls", response_model=URLList)
+async def list_urls(
+    request: Request,
+    skip: int = Query(0, ge=0, description="Número de URLs para pular"),
+    limit: int = Query(10, ge=1, le=100, description="Número máximo de URLs para retornar")
+):
     """
-    Recupera a URL original a partir do código curto.
+    Lista URLs com paginação.
     """
     try:
-        api_logger.info(f"Recebida requisição para buscar URL: {short_code}")
+        api_logger.info(f"Recebida requisição para listar URLs (skip={skip}, limit={limit})")
         
-        # Busca a URL
-        url = url_service.get_url(short_code)
+        # Lista as URLs
+        urls = url_service.list_urls(skip, limit)
+        total = url_service.count_urls()
         
-        if not url:
-            api_logger.warning(f"URL não encontrada: {short_code}")
-            raise HTTPException(status_code=404, detail="URL não encontrada")
-        
-        api_logger.info(f"URL encontrada: {short_code} -> {url}")
-        return URLResponse(short_code=short_code, original_url=url)
-    except HTTPException:
-        raise
+        api_logger.info(f"Listagem de URLs obtida com sucesso: {len(urls)} URLs")
+        return URLList(urls=urls, total=total)
     except Exception as e:
-        api_logger.error(f"Erro ao buscar URL: {e}")
+        api_logger.error(f"Erro ao listar URLs: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/stats/{short_code}", response_model=URLStats)
@@ -79,28 +101,6 @@ async def get_url_stats(request: Request, short_code: str):
         raise
     except Exception as e:
         api_logger.error(f"Erro ao obter estatísticas: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.get("/urls", response_model=URLList)
-async def list_urls(
-    request: Request,
-    skip: int = Query(0, ge=0, description="Número de URLs para pular"),
-    limit: int = Query(10, ge=1, le=100, description="Número máximo de URLs para retornar")
-):
-    """
-    Lista URLs com paginação.
-    """
-    try:
-        api_logger.info(f"Recebida requisição para listar URLs (skip={skip}, limit={limit})")
-        
-        # Lista as URLs
-        urls = url_service.list_urls(skip, limit)
-        total = url_service.count_urls()
-        
-        api_logger.info(f"Listagem de URLs obtida com sucesso: {len(urls)} URLs")
-        return URLList(urls=urls, total=total)
-    except Exception as e:
-        api_logger.error(f"Erro ao listar URLs: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/{short_code}")
@@ -154,27 +154,4 @@ async def update_url(request: Request, short_code: str, url_update: URLUpdate):
         raise
     except Exception as e:
         api_logger.error(f"Erro ao atualizar URL: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.get("/health")
-async def health_check(request: Request):
-    """
-    Verifica a saúde da API.
-    """
-    try:
-        api_logger.info("Recebida requisição para verificar saúde da API")
-        
-        # Verifica a conexão com o repositório
-        is_healthy = url_service.check_connection()
-        
-        if not is_healthy:
-            api_logger.error("Falha ao verificar saúde da API")
-            raise HTTPException(status_code=503, detail="Serviço indisponível")
-        
-        api_logger.info("Verificação de saúde da API concluída com sucesso")
-        return {"status": "healthy"}
-    except HTTPException:
-        raise
-    except Exception as e:
-        api_logger.error(f"Erro ao verificar saúde da API: {e}")
         raise HTTPException(status_code=500, detail=str(e)) 

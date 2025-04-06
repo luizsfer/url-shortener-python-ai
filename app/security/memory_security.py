@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Dict, Set
+from urllib.parse import urlparse
 from app.core.config import get_settings
 from app.core.logging import security_logger
 
@@ -107,9 +108,15 @@ class MemorySecurity:
                 security_logger.warning(f"URL muito longa: {len(url)} caracteres")
                 return False
             
-            # Verifica se a URL começa com http:// ou https://
-            if not url.startswith(("http://", "https://")):
-                security_logger.warning(f"URL sem protocolo: {url}")
+            # Verifica se a URL começa com um protocolo permitido
+            parsed = urlparse(url)
+            if parsed.scheme not in settings.SECURITY_ALLOWED_SCHEMES:
+                security_logger.warning(f"Esquema não permitido: {parsed.scheme}")
+                return False
+            
+            # Verifica se o domínio está bloqueado
+            if parsed.netloc in settings.SECURITY_BLOCKED_DOMAINS:
+                security_logger.warning(f"Domínio bloqueado: {parsed.netloc}")
                 return False
             
             security_logger.info(f"URL válida: {url}")

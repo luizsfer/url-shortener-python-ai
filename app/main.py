@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.url_routes import router as url_router
+from app.api.redirect_routes import router as redirect_router
 from app.core.config import get_settings
 from app.security.middleware import SecurityMiddleware
 from app.core.logging import api_logger
@@ -26,6 +27,7 @@ app.add_middleware(
 app.add_middleware(SecurityMiddleware)
 
 # Registra as rotas
+app.include_router(redirect_router, prefix="", tags=["redirect"])
 app.include_router(url_router, prefix="/api/v1", tags=["urls"])
 
 @app.on_event("startup")

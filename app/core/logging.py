@@ -4,9 +4,9 @@ from logging.handlers import RotatingFileHandler
 import os
 from pathlib import Path
 
-# Cria o diretório de logs se não existir
-log_dir = Path("logs")
-log_dir.mkdir(exist_ok=True)
+# Configuração do diretório de logs
+LOG_DIR = Path("logs")
+LOG_DIR.mkdir(exist_ok=True)
 
 # Configuração do logger
 def setup_logger(name: str, log_file: str = None, level=logging.INFO):
@@ -38,7 +38,7 @@ def setup_logger(name: str, log_file: str = None, level=logging.INFO):
     # Handler para arquivo (se especificado)
     if log_file:
         file_handler = RotatingFileHandler(
-            log_dir / log_file,
+            LOG_DIR / log_file,
             maxBytes=10485760,  # 10MB
             backupCount=5
         )
@@ -50,5 +50,4 @@ def setup_logger(name: str, log_file: str = None, level=logging.INFO):
 # Loggers para diferentes componentes
 api_logger = setup_logger("api", "api.log")
 security_logger = setup_logger("security", "security.log")
-url_logger = setup_logger("url", "url.log")
-redis_logger = setup_logger("redis", "redis.log") 
+memory_logger = setup_logger("memory", "memory.log") 

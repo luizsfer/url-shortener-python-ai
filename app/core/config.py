@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 from functools import lru_cache
+from typing import List
 
 class Settings(BaseSettings):
     # Configurações da aplicação
@@ -14,6 +15,8 @@ class Settings(BaseSettings):
     SECURITY_MAX_REQUEST_SIZE: int = 1048576
     SECURITY_IP_BLOCK_DURATION: int = 3600
     SECURITY_MAX_FAILED_REQUESTS: int = 100
+    SECURITY_ALLOWED_SCHEMES: List[str] = ["http", "https"]
+    SECURITY_BLOCKED_DOMAINS: List[str] = ["localhost", "127.0.0.1"]
     
     class Config:
         env_file = ".env"

@@ -14,6 +14,12 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             # Obtém o IP do cliente
             client_ip = request.client.host if request.client else "unknown"
             
+            # Ignora o rate limit para requisições de redirecionamento
+            if not request.url.path.startswith("/api/"):
+                # Processa a requisição
+                response = await call_next(request)
+                return response
+            
             # Verifica o limite de requisições
             if not self.security.check_rate_limit(client_ip):
                 security_logger.warning(f"Requisição bloqueada de IP: {client_ip}")
