@@ -37,7 +37,7 @@ app.include_router(url_router, prefix="/api/v1", tags=["urls"])
 async def startup_event():
     api_logger.info("API iniciada com sucesso")
     api_logger.info(f"Host: 0.0.0.0")
-    api_logger.info(f"Port: {os.getenv('PORT', '8000')}")
+    api_logger.info(f"Port: {os.getenv('PORT', '10000')}")
 
 @app.on_event("shutdown")
 async def shutdown_event():
